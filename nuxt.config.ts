@@ -1,3 +1,4 @@
+// User's custom Nuxt configuration
 export default defineNuxtConfig({
   compatibilityDate: '2025-04-06',
   devtools: { enabled: true },
@@ -9,5 +10,12 @@ export default defineNuxtConfig({
         { name: 'description', content: 'Test Nuxt application for validating Webflow Cloud hosting, builds, and deployments.' }
       ]
     }
-  }
-})
+  },
+  ssr: true,
+  nitro: {
+    compressPublicAssets: true,
+  },
+  experimental: {
+    payloadExtraction: true,
+  },
+});
