@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-04-06',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: ['@nuxtjs/tailwindcss', 'nitro-cloudflare-dev'],
   app: {
     head: {
       title: 'Webflow Cloud Test App',
@@ -13,6 +13,7 @@ export default defineNuxtConfig({
   },
   ssr: true,
   nitro: {
+    preset: 'cloudflare-pages',
     compressPublicAssets: true,
   },
   experimental: {
