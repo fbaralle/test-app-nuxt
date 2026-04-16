@@ -3,7 +3,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const body = await readBody(event);
-    const { user_id = "anonymous", coin_id } = body;
+    const { user_id = "public", coin_id, coin_name, coin_symbol, coin_image } = body;
 
     if (!coin_id) {
       throw createError({
@@ -13,9 +13,9 @@ export default defineEventHandler(async (event) => {
     }
 
     await env.DB.prepare(
-      "INSERT OR IGNORE INTO favorites (user_id, coin_id, created_at) VALUES (?, ?, ?)"
+      "INSERT OR IGNORE INTO favorites (user_id, coin_id, coin_name, coin_symbol, coin_image, created_at) VALUES (?, ?, ?, ?, ?, ?)"
     )
-      .bind(user_id, coin_id, Date.now())
+      .bind(user_id, coin_id, coin_name || null, coin_symbol || null, coin_image || null, Date.now())
       .run();
 
     return { success: true, coin_id };

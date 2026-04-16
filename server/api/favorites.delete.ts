@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   const { env } = event.context.cloudflare;
   const query = getQuery(event);
-  const userId = (query.user_id as string) || "anonymous";
+  const userId = (query.user_id as string) || "public";
   const coinId = query.coin_id as string;
 
   if (!coinId) {

@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss', 'nitro-cloudflare-dev'],
   app: {
+    baseURL: process.env.COSMIC_MOUNT_PATH || process.env.NUXT_PUBLIC_BASE_PATH || '',
     head: {
       title: 'Webflow Cloud Test App',
       meta: [

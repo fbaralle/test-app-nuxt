@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted, onMounted } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 
 interface Coin {
@@ -16,6 +16,16 @@ interface Coin {
   high_24h: number
   low_24h: number
   sparkline_in_7d: { price: number[] }
+}
+
+interface Favorite {
+  id: number
+  user_id: string
+  coin_id: string
+  coin_name: string | null
+  coin_symbol: string | null
+  coin_image: string | null
+  created_at: number
 }
 
 type SortKey =
@@ -137,6 +147,12 @@ const refreshInterval = ref(30)
 const countdown = ref(0)
 let countdownInterval: ReturnType<typeof setInterval> | null = null
 
+// Favorites state
+const favorites = ref<Favorite[]>([])
+const favoritesLoading = ref(false)
+const config = useRuntimeConfig()
+const baseURL = computed(() => config.app?.baseURL || '')
+
 // Toast functions
 function addToast(toast: { label: string; code: string; detail: string; type?: 'error' | 'info' }) {
   const id = ++toastIdCounter
@@ -209,6 +225,84 @@ watch(dataUpdatedAt, () => {
 
 onUnmounted(() => {
   if (countdownInterval) clearInterval(countdownInterval)
+})
+
+// Favorites functions
+async function fetchFavorites() {
+  favoritesLoading.value = true
+  try {
+    const res = await fetch(`${baseURL.value}/api/favorites`)
+    if (res.ok) {
+      const data = await res.json()
+      favorites.value = data.favorites || []
+    }
+  } catch (e) {
+    // Silently fail for favorites
+  } finally {
+    favoritesLoading.value = false
+  }
+}
+
+function isFavorite(coinId: string): boolean {
+  return favorites.value.some(f => f.coin_id === coinId)
+}
+
+async function toggleFavorite(coin: Coin, event: Event) {
+  event.stopPropagation()
+  const coinId = coin.id
+
+  if (isFavorite(coinId)) {
+    // Remove favorite
+    try {
+      const res = await fetch(`${baseURL.value}/api/favorites?coin_id=${encodeURIComponent(coinId)}`, {
+        method: 'DELETE'
+      })
+      if (res.ok) {
+        favorites.value = favorites.value.filter(f => f.coin_id !== coinId)
+      }
+    } catch (e) {
+      addToast({
+        label: 'Error',
+        code: 'FAVORITES_ERROR',
+        detail: 'Failed to remove favorite'
+      })
+    }
+  } else {
+    // Add favorite
+    try {
+      const res = await fetch(`${baseURL.value}/api/favorites`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          coin_id: coin.id,
+          coin_name: coin.name,
+          coin_symbol: coin.symbol,
+          coin_image: coin.image
+        })
+      })
+      if (res.ok) {
+        favorites.value.unshift({
+          id: Date.now(),
+          user_id: 'public',
+          coin_id: coin.id,
+          coin_name: coin.name,
+          coin_symbol: coin.symbol,
+          coin_image: coin.image,
+          created_at: Date.now()
+        })
+      }
+    } catch (e) {
+      addToast({
+        label: 'Error',
+        code: 'FAVORITES_ERROR',
+        detail: 'Failed to add favorite'
+      })
+    }
+  }
+}
+
+onMounted(() => {
+  fetchFavorites()
 })
 
 // Computed
@@ -398,6 +492,7 @@ function getPriceBarPosition(low: number, high: number, current: number): number
         <table class="w-full text-sm">
           <thead>
             <tr class="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-left">
+              <th class="px-2 py-3 font-medium w-10"></th>
               <th
                 class="px-4 py-3 font-medium cursor-pointer hover:text-gray-900 dark:hover:text-white whitespace-nowrap"
                 @click="handleSort('market_cap_rank')"
@@ -441,7 +536,7 @@ function getPriceBarPosition(low: number, high: number, current: number): number
                 :key="i"
                 class="border-t border-gray-100 dark:border-gray-800 animate-pulse"
               >
-                <td class="px-4 py-4" colspan="8">
+                <td class="px-4 py-4" colspan="9">
                   <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
                 </td>
               </tr>
@@ -459,6 +554,22 @@ function getPriceBarPosition(low: number, high: number, current: number): number
                     : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
                 ]"
               >
+                <td class="px-2 py-3 text-center">
+                  <button
+                    @click="toggleFavorite(coin, $event)"
+                    :class="[
+                      'p-1 rounded transition-colors',
+                      isFavorite(coin.id)
+                        ? 'text-yellow-500 hover:text-yellow-600'
+                        : 'text-gray-300 dark:text-gray-600 hover:text-yellow-500'
+                    ]"
+                    :title="isFavorite(coin.id) ? 'Remove from favorites' : 'Add to favorites'"
+                  >
+                    <svg class="w-5 h-5" :fill="isFavorite(coin.id) ? 'currentColor' : 'none'" viewBox="0 0 20 20" stroke="currentColor" stroke-width="1.5">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </button>
+                </td>
                 <td class="px-4 py-3 text-gray-500 dark:text-gray-400 font-mono">
                   {{ coin.market_cap_rank }}
                 </td>

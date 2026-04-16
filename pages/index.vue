@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CryptoDashboard from '~/components/CryptoDashboard.vue'
+import FavoritesSection from '~/components/FavoritesSection.vue'
 </script>
 
 <template>
@@ -16,6 +17,7 @@ import CryptoDashboard from '~/components/CryptoDashboard.vue'
       </p>
     </header>
     <main class="flex-1 px-4 pb-12">
+      <FavoritesSection />
       <CryptoDashboard />
     </main>
     <footer class="border-t border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-gray-900/60 backdrop-blur">
