@@ -1,5 +1,18 @@
 export default defineEventHandler(async (event) => {
-  const { env } = event.context.cloudflare;
+  let env;
+  try {
+    env = event.context.cloudflare?.env;
+  } catch {
+    // Local dev without Cloudflare bindings
+  }
+
+  if (!env?.MEDIA) {
+    throw createError({
+      statusCode: 503,
+      message: "R2 storage binding not available",
+    });
+  }
+
   const query = getQuery(event);
   const exportId = query.id as string;
 

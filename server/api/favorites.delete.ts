@@ -1,5 +1,18 @@
 export default defineEventHandler(async (event) => {
-  const { env } = event.context.cloudflare;
+  let env;
+  try {
+    env = event.context.cloudflare?.env;
+  } catch {
+    // Local dev without Cloudflare bindings
+  }
+
+  if (!env?.DB) {
+    throw createError({
+      statusCode: 503,
+      message: "D1 database binding not available",
+    });
+  }
+
   const query = getQuery(event);
   const userId = (query.user_id as string) || "public";
   const coinId = query.coin_id as string;

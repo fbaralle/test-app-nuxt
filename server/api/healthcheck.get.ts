@@ -58,7 +58,25 @@ async function checkR2(r2: R2Bucket): Promise<ServiceStatus> {
 }
 
 export default defineEventHandler(async (event) => {
-  const { env } = event.context.cloudflare;
+  let env;
+  try {
+    env = event.context.cloudflare?.env;
+  } catch {
+    // Local dev without Cloudflare bindings
+  }
+
+  if (!env) {
+    return {
+      status: "unhealthy",
+      timestamp: new Date().toISOString(),
+      services: {
+        d1: { status: "error", latency: 0, error: "Cloudflare bindings not available" },
+        kv_sessions: { status: "error", latency: 0, error: "Cloudflare bindings not available" },
+        kv_flags: { status: "error", latency: 0, error: "Cloudflare bindings not available" },
+        r2: { status: "error", latency: 0, error: "Cloudflare bindings not available" },
+      },
+    } as HealthcheckResponse;
+  }
 
   const [d1, kv_sessions, kv_flags, r2] = await Promise.all([
     checkD1(env.DB),
