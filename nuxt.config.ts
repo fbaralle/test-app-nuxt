@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiMountPath: process.env.PUBLIC_API_MOUNT_PATH || ''
+      apiMountPath: process.env.APP_PUBLIC_API_PATH || ''
     }
   },
   ssr: true,
