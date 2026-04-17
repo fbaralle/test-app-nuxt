@@ -83,9 +83,12 @@ const isExpanded = ref(true)
 const hoveredService = ref<ServiceName | null>(null)
 let interval: ReturnType<typeof setInterval> | null = null
 
+const config = useRuntimeConfig()
+const basePath = computed(() => config.public.apiMountPath || '')
+
 async function fetchHealth() {
   try {
-    const res = await fetch('/api/healthcheck')
+    const res = await fetch(`${basePath.value}/api/healthcheck`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     health.value = (await res.json()) as HealthcheckResponse
     error.value = null

@@ -29,7 +29,7 @@ const error = ref<string | null>(null)
 const hasTracked = ref(false)
 
 const config = useRuntimeConfig()
-const baseURL = computed(() => config.app?.baseURL || '')
+const basePath = computed(() => config.public.apiMountPath || '')
 
 function getVisitorId(): string | null {
   if (typeof window === 'undefined') return null
@@ -43,7 +43,7 @@ function setVisitorId(id: string): void {
 
 async function fetchPageViews() {
   try {
-    const res = await fetch(`${baseURL.value}/api/pageviews`)
+    const res = await fetch(`${basePath.value}/api/pageviews`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const json = await res.json()
     if (json.error) throw new Error(json.error)
@@ -64,7 +64,7 @@ async function trackPageView() {
 
   try {
     const visitorId = getVisitorId()
-    const res = await fetch(`${baseURL.value}/api/pageviews`, {
+    const res = await fetch(`${basePath.value}/api/pageviews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ visitorId }),

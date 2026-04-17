@@ -16,13 +16,13 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 
 const config = useRuntimeConfig()
-const baseURL = computed(() => config.app?.baseURL || '')
+const basePath = computed(() => config.public.apiMountPath || '')
 
 async function fetchFavorites() {
   loading.value = true
   error.value = null
   try {
-    const res = await fetch(`${baseURL.value}/api/favorites`)
+    const res = await fetch(`${basePath.value}/api/favorites`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
     favorites.value = data.favorites || []
@@ -35,7 +35,7 @@ async function fetchFavorites() {
 
 async function removeFavorite(coinId: string) {
   try {
-    const res = await fetch(`${baseURL.value}/api/favorites?coin_id=${encodeURIComponent(coinId)}`, {
+    const res = await fetch(`${basePath.value}/api/favorites?coin_id=${encodeURIComponent(coinId)}`, {
       method: 'DELETE'
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -47,7 +47,7 @@ async function removeFavorite(coinId: string) {
 
 async function addFavorite(coin: { id: string; name: string; symbol: string; image: string }) {
   try {
-    const res = await fetch(`${baseURL.value}/api/favorites`, {
+    const res = await fetch(`${basePath.value}/api/favorites`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -24,7 +24,7 @@ const error = ref<string | null>(null)
 const updating = ref<string | null>(null)
 
 const config = useRuntimeConfig()
-const baseURL = computed(() => config.app?.baseURL || '')
+const basePath = computed(() => config.public.apiMountPath || '')
 
 const FLAG_LABELS: Record<string, { label: string; description: string }> = {
   dark_mode: { label: 'Dark Mode', description: 'Enable dark theme' },
@@ -38,7 +38,7 @@ async function fetchFlags() {
   loading.value = true
   error.value = null
   try {
-    const res = await fetch(`${baseURL.value}/api/flags`)
+    const res = await fetch(`${basePath.value}/api/flags`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = (await res.json()) as FlagsResponse
     if (data.error) {
@@ -56,7 +56,7 @@ async function toggleFlag(flag: string) {
   updating.value = flag
   try {
     const newValue = !flags.value[flag]
-    const res = await fetch(`${baseURL.value}/api/flags`, {
+    const res = await fetch(`${basePath.value}/api/flags`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ flag, value: newValue }),

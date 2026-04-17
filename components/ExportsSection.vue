@@ -21,13 +21,13 @@ const error = ref<string | null>(null)
 const creating = ref(false)
 
 const config = useRuntimeConfig()
-const baseURL = computed(() => config.app?.baseURL || '')
+const basePath = computed(() => config.public.apiMountPath || '')
 
 async function fetchExports() {
   loading.value = true
   error.value = null
   try {
-    const res = await fetch(`${baseURL.value}/api/export`)
+    const res = await fetch(`${basePath.value}/api/export`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
     exports.value = data.exports || []
@@ -41,7 +41,7 @@ async function fetchExports() {
 async function createExport() {
   creating.value = true
   try {
-    const res = await fetch(`${baseURL.value}/api/export`, {
+    const res = await fetch(`${basePath.value}/api/export`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
