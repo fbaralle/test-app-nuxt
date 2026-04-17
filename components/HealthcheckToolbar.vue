@@ -88,7 +88,7 @@ const basePath = computed(() => config.public.apiMountPath || '')
 
 async function fetchHealth() {
   try {
-    const res = await fetch(`${basePath.value}/api/healthcheck`)
+    const res = await fetch(`${basePath.value}/api/binding-status`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     health.value = (await res.json()) as HealthcheckResponse
     error.value = null
