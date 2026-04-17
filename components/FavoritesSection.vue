@@ -16,7 +16,7 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 
 const config = useRuntimeConfig()
-const basePath = computed(() => config.public.apiMountPath || '')
+const basePath = computed(() => (config.app.baseURL || '').replace(/\/$/, ''))
 
 async function fetchFavorites() {
   loading.value = true

@@ -84,7 +84,7 @@ const hoveredService = ref<ServiceName | null>(null)
 let interval: ReturnType<typeof setInterval> | null = null
 
 const config = useRuntimeConfig()
-const basePath = computed(() => config.public.apiMountPath || '')
+const basePath = computed(() => (config.app.baseURL || '').replace(/\/$/, ''))
 
 async function fetchHealth() {
   try {

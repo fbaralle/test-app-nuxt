@@ -29,7 +29,7 @@ const error = ref<string | null>(null)
 const hasTracked = ref(false)
 
 const config = useRuntimeConfig()
-const basePath = computed(() => config.public.apiMountPath || '')
+const basePath = computed(() => (config.app.baseURL || '').replace(/\/$/, ''))
 
 function getVisitorId(): string | null {
   if (typeof window === 'undefined') return null
