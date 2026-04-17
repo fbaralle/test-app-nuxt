@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
       data: body,
     };
 
-    await env.WEBFLOW_CLOUD_MEDIA.put(
+    await env.MEDIA.put(
       `exports/${exportId}`,
       JSON.stringify(exportData),
       {
